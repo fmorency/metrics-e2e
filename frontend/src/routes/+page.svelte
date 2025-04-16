@@ -36,27 +36,17 @@
             mapsTo: 'value',
             title: 'Available Memory (MiB)',
             scaleType: ScaleTypes.LINEAR,
-            domain: calculateDomain(chartData)
           }
         },
+        curve: 'curveMonotoneX',
+        includeZero: false,
         height: '400px',
         theme: 'g100',
         legend: {
           position: 'bottom'
         }
       };
-
-    function calculateDomain(data: ChartDataPoint[]): [number, number] {
-        if (data.length === 0) return [0, 100];
-
-        const values = data.map(item => item.value);
-        const min = Math.floor(Math.min(...values) * 0.9); // 10% padding below
-        const max = Math.ceil(Math.max(...values) * 1.1);  // 10% padding above
-
-        return [min, max];
-      }
-
-    async function fetchMetricsData() {
+  async function fetchMetricsData() {
         try {
             // Adjust the URL to match your PostgREST endpoint
             const response = await fetch('http://localhost:3000/netdata_metrics?order=timestamp.desc&limit=100');
