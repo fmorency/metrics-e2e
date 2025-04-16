@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  netdata:
+    image: netdata/netdata:stable
+    container_name: netdata
+    hostname: netdata
+    ports:
+      - 19999:19999
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    # Removed exporting.conf mount and environment variables since we're not pushing
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    container_name: timescaledb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: metrics
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./timescaledb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
+  python-etl:
+    build:
+      context: ./python-etl
+    container_name: python-etl
+    environment:
+      - NETDATA_URL=http://netdata:19999
+      - TIMESCALEDB_HOST=timescaledb
+      - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_DATABASE=metrics
+      - TIMESCALEDB_USER=postgres
+      - TIMESCALEDB_PASSWORD=postgres
+      - COLLECTION_INTERVAL=10
+    volumes:
+      - ./python-etl:/app
+    depends_on:
+      - netdata
+      - timescaledb
+    restart: unless-stopped
+
+  postgrest:
+    image: postgrest/postgrest:v12.2.8
+    container_name: postgrest
+    ports:
+      - 3000:3000
+    environment:
+      PGRST_DB_URI: postgres://postgres:postgres@timescaledb:5432/metrics
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: postgres
+    depends_on:
+      - timescaledb
+    restart: unless-stopped
+
+  frontend:
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+      container_name: frontend
+      ports:
+        - "5173:5173"
+      environment:
+        - PUBLIC_API_URL=http://postgrest:3000
+      volumes:
+        - ./frontend:/app
+        - /app/node_modules
+      depends_on:
+        - postgrest
+      restart: unless-stopped
+
+volumes:
+  pgdata:
