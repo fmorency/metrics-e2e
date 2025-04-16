@@ -41,6 +41,9 @@
         },
         height: '400px',
         theme: 'g100',
+        legend: {
+          position: 'bottom'
+        }
       };
 
     function calculateDomain(data: ChartDataPoint[]): [number, number] {
@@ -66,7 +69,7 @@
 
             // Transform data to match Carbon charts format
           chartData = rawData.map((record: MetricRecord): ChartDataPoint => ({
-              group: record.chart,
+              group: `${record.chart} (${record.instance})`,
               key: new Date(record.timestamp).toLocaleString(),
               value: record.value,
               date: new Date(record.timestamp),

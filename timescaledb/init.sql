@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS netdata_metrics (
 
 -- Convert to TimescaleDB hypertable
 SELECT create_hypertable('netdata_metrics', 'timestamp', if_not_exists => TRUE);
+ALTER TABLE netdata_metrics SET (
+    timescaledb.compress,
+    timescaledb.compress_segmentby = 'chart,family,dimension,instance'
+);
+SELECT add_retention_policy('netdata_metrics', INTERVAL '10 days');
+SELECT add_compression_policy('netdata_metrics', INTERVAL '1 day');
 
 -- Create index for faster queries
 CREATE INDEX IF NOT EXISTS idx_netdata_metrics_chart ON netdata_metrics (chart, timestamp DESC);

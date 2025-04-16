@@ -16,7 +16,41 @@ services:
       - /sys:/host/sys:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
-    # Removed exporting.conf mount and environment variables since we're not pushing
+
+  netdata2:
+    image: netdata/netdata:stable
+    container_name: netdata2
+    hostname: netdata2
+    ports:
+      - 19998:19999  # Use a different host port (19998)
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - netdata
+      - netdata2
+    restart: unless-stopped
 
   timescaledb:
     image: timescale/timescaledb:latest-pg17
@@ -37,7 +71,7 @@ services:
       context: ./python-etl
     container_name: python-etl
     environment:
-      - NETDATA_URL=http://netdata:19999
+      - PROMETHEUS_URL=http://prometheus:9090
       - TIMESCALEDB_HOST=timescaledb
       - TIMESCALEDB_PORT=5432
       - TIMESCALEDB_DATABASE=metrics
@@ -47,7 +81,7 @@ services:
     volumes:
       - ./python-etl:/app
     depends_on:
-      - netdata
+      - prometheus
       - timescaledb
     restart: unless-stopped
 
@@ -82,3 +116,4 @@ services:
 
 volumes:
   pgdata:
+  prometheus_data:
