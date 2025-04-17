@@ -19,7 +19,6 @@ export function getChartOptions(config: ChartConfig) {
     curve: 'curveMonotoneX',
     includeZero: false,
     height: '400px',
-    theme: 'g100',
     color: {
       gradient: {
         enabled: true
@@ -29,7 +28,15 @@ export function getChartOptions(config: ChartConfig) {
       enabled: false
     },
     legend: {
-      position: 'bottom'
+      enabled: false
+    },
+    toolbar: {
+      enabled: false
+    },
+    grid: {
+      x: {
+        enabled: false
+      }
     }
   };
 }

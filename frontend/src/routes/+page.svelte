@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { AreaChart } from '@carbon/charts-svelte';
   import '@carbon/charts-svelte/styles.css';
-  import { getChartOptions } from '$lib/options';
   import { readable } from 'svelte/store';
   import { invalidateAll } from '$app/navigation';
   import type {PageProps} from "../../.svelte-kit/types/src/routes/$types";
+  import ChartCard from "$lib/ChartCard.svelte";
 
   let { data }: PageProps = $props();
 
@@ -31,11 +30,7 @@
       {#each configs as config, i}
         <div class="rounded-lg overflow-hidden p-4">
           {#if datasets[i]?.length}
-            <AreaChart
-              data={datasets[i]}
-              options={getChartOptions(config)}
-              style="padding:2rem;"
-            />
+            <ChartCard config={config} data={datasets[i]} />
           {:else}
             <p>No data available for {config.title}</p>
           {/if}
