@@ -6,5 +6,10 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	ssr: {
 			noExternal: process.env.NODE_ENV === 'production' ? ['@carbon/charts'] : []
-	}
+	},
+	server: {
+    proxy: {
+      '/netdata_metrics': 'http://postgrest:3000'
+    }
+  }
 });
