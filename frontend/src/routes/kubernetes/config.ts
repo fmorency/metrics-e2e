@@ -21,8 +21,8 @@ export const configs: ChartConfig[] = [
   },
   {
     id: 'kube.memory',
-    title: 'Kubernetes Memory',
-    yAxisTitle: 'Memory (GiB)',
+    title: 'Kubernetes Memory (TiB)',
+    yAxisTitle: 'Memory (TiB)',
     category: 'kube'
   },
 ];

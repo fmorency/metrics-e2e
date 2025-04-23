@@ -23,7 +23,7 @@
     {/snippet}
   </AppBar>
 
-  <div class="card border-surface-100-900 grid w-full grid-cols-[auto_1fr] border-[1px]">
+  <div class="card border-surface-100-900 grid w-full grid-cols-[auto_1fr] border-[1px] flex-1 overflow-hidden">
     <Navigation.Rail>
       {#snippet tiles()}
         <Navigation.Tile href="/blockchain" title="Blockchain"><Blockchain /></Navigation.Tile>
@@ -37,7 +37,7 @@
       {/snippet}
     </Navigation.Rail>
 
-    <div class="overflow-y-auto h-screen">
+    <div class="overflow-y-auto">
       <slot />
     </div>
   </div>

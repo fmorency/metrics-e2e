@@ -112,7 +112,7 @@
     "add_jitter": false
   },
   {
-    "query": "sum(netdata_system_ram_MiB_average{service=~\"netdata-kubernetes-prod-ops|netdata-kubernetes-prod-02\"})",
+    "query": "sum(netdata_system_ram_MiB_average{service=~\"netdata-kubernetes-prod-ops|netdata-kubernetes-prod-02\"}) / 1048576",
     "chart": "kube.memory",
     "family": "kube",
     "dimension": "count",
