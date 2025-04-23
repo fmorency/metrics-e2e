@@ -1,4 +1,5 @@
 type ChartCategory = 'disk' | 'network' | 'minio' | 'kube' | 'gpu' | 'blockchain';
+export type TimeInterval = '15s' | '1m' | '1h' | '1d' | '1w' | '1M' | '1y';
 
 export interface ChartConfig {
   id: string;
