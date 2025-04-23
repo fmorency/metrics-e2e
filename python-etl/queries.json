@@ -180,5 +180,19 @@
     "family": "blockchain",
     "dimension": "count",
     "add_jitter": false
+  },
+  {
+    "query": "max(max(netdata_prometheus_custom_exporter_local_manifest_ghostcloud_total_sites_sites_average{service=\"netdata-kvstore-qa-01\"}) or max(netdata_sites_number_average{chart=\"manifest_Manifest_Network.sites\",many_chain=\"manifest-web-alpha\"}))",
+    "chart": "web.sites",
+    "family": "web",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(sum_over_time(netdata_prometheus_nginx_exporter_local_nginx_http_requests_total_requests_persec_average{job=\"netdata-cdn-prod-web\"}[10m]))",
+    "chart": "web.requests",
+    "family": "web",
+    "dimension": "count",
+    "add_jitter": false
   }
 ]

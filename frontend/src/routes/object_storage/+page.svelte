@@ -27,7 +27,7 @@
   {:then datasets}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {#each configs as config, i}
-        <div class="rounded-lg overflow-hidden p-4">
+        <div class="card preset-filled-surface-100-900 overflow-hidden p-4">
           {#if datasets[i]?.length}
             <ChartCard config={config} data={datasets[i]} />
           {:else}
