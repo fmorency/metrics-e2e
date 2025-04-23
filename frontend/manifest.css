@@ -1,0 +1,226 @@
+[data-theme='manifest'] {
+  /* Base settings */
+  --text-scaling: 1.067;
+  --base-font-color: var(--color-surface-950);
+  --base-font-color-dark: var(--color-surface-50);
+  --base-font-family: 'Source Sans Pro';
+  --base-font-size: inherit;
+  --base-line-height: inherit;
+  --base-font-weight: normal;
+  --base-font-style: normal;
+  --base-letter-spacing: 0em;
+  --heading-font-color: 'Inter';
+  --heading-font-color-dark: inherit;
+  --heading-font-family: inherit;
+  --heading-font-weight: bold;
+  --heading-font-style: normal;
+  --heading-letter-spacing: inherit;
+
+  /* Links */
+  --anchor-font-color: var(--color-primary-500);
+  --anchor-font-color-dark: var(--color-primary-500);
+  --anchor-font-family: inherit;
+  --anchor-font-size: inherit;
+  --anchor-line-height: inherit;
+  --anchor-font-weight: inherit;
+  --anchor-font-style: inherit;
+  --anchor-letter-spacing: inherit;
+  --anchor-text-decoration: none;
+  --anchor-text-decoration-hover: underline;
+  --anchor-text-decoration-active: none;
+  --anchor-text-decoration-focus: none;
+
+  /* Spacing & radius */
+  --spacing: 0.25rem;
+  --radius-base: 0.375rem;
+  --radius-container: 0.75rem;
+  --default-border-width: 1px;
+  --default-divide-width: 1px;
+  --default-ring-width: 1px;
+
+  /* Body backgrounds */
+  --body-background-color: var(--color-surface-50);
+  --body-background-color-dark: var(--color-surface-950);
+
+  /* Primary (Sovereign Blue #1A222B) */
+  --color-primary-50:  #F9FAFB;
+  --color-primary-100: #E4E7EB;
+  --color-primary-200: #C0C7CF;
+  --color-primary-300: #9CA7B3;
+  --color-primary-400: #657386;
+  --color-primary-500: #1A222B; /* brand */
+  --color-primary-600: #151C24;
+  --color-primary-700: #0F1419;
+  --color-primary-800: #0A0E11;
+  --color-primary-900: #050609;
+  --color-primary-950: #030306;
+  --color-primary-contrast-dark:  var(--color-primary-950);
+  --color-primary-contrast-light: var(--color-primary-50);
+  --color-primary-contrast-50:  var(--color-primary-contrast-dark);
+  --color-primary-contrast-100: var(--color-primary-contrast-dark);
+  --color-primary-contrast-200: var(--color-primary-contrast-dark);
+  --color-primary-contrast-300: var(--color-primary-contrast-dark);
+  --color-primary-contrast-400: var(--color-primary-contrast-dark);
+  --color-primary-contrast-500: var(--color-primary-contrast-light);
+  --color-primary-contrast-600: var(--color-primary-contrast-light);
+  --color-primary-contrast-700: var(--color-primary-contrast-light);
+  --color-primary-contrast-800: var(--color-primary-contrast-light);
+  --color-primary-contrast-900: var(--color-primary-contrast-light);
+  --color-primary-contrast-950: var(--color-primary-contrast-light);
+
+  /* Secondary (Rebel Warm #E5703D / Rebel Deep #DD4E1E) */
+  --color-secondary-50:  #FEF3EE;
+  --color-secondary-100: #FBD9CC;
+  --color-secondary-200: #F7B398;
+  --color-secondary-300: #F28D64;
+  --color-secondary-400: #EE6E3F;
+  --color-secondary-500: #E5703D;
+  --color-secondary-600: #DD4E1E;
+  --color-secondary-700: #B3532D;
+  --color-secondary-800: #994425;
+  --color-secondary-900: #7F341D;
+  --color-secondary-950: #652713;
+  --color-secondary-contrast-dark:  var(--color-secondary-950);
+  --color-secondary-contrast-light: var(--color-secondary-50);
+  --color-secondary-contrast-50:  var(--color-secondary-contrast-dark);
+  --color-secondary-contrast-100: var(--color-secondary-contrast-dark);
+  --color-secondary-contrast-200: var(--color-secondary-contrast-dark);
+  --color-secondary-contrast-300: var(--color-secondary-contrast-dark);
+  --color-secondary-contrast-400: var(--color-secondary-contrast-light);
+  --color-secondary-contrast-500: var(--color-secondary-contrast-light);
+  --color-secondary-contrast-600: var(--color-secondary-contrast-light);
+  --color-secondary-contrast-700: var(--color-secondary-contrast-light);
+  --color-secondary-contrast-800: var(--color-secondary-contrast-light);
+  --color-secondary-contrast-900: var(--color-secondary-contrast-light);
+  --color-secondary-contrast-950: var(--color-secondary-contrast-light);
+
+  /* Tertiary (Secure Medium #476FA8) */
+  --color-tertiary-50:  #F1F4F9;
+  --color-tertiary-100: #D4DBF3;
+  --color-tertiary-200: #A9B6E7;
+  --color-tertiary-300: #7D91DB;
+  --color-tertiary-400: #5F77D0;
+  --color-tertiary-500: #476FA8;
+  --color-tertiary-600: #3F5E94;
+  --color-tertiary-700: #354C7A;
+  --color-tertiary-800: #2C3A60;
+  --color-tertiary-900: #202747;
+  --color-tertiary-950: #181D35;
+  --color-tertiary-contrast-dark:  var(--color-tertiary-950);
+  --color-tertiary-contrast-light: var(--color-tertiary-50);
+  --color-tertiary-contrast-50:  var(--color-tertiary-contrast-dark);
+  --color-tertiary-contrast-100: var(--color-tertiary-contrast-dark);
+  --color-tertiary-contrast-200: var(--color-tertiary-contrast-dark);
+  --color-tertiary-contrast-300: var(--color-tertiary-contrast-light);
+  --color-tertiary-contrast-400: var(--color-tertiary-contrast-light);
+  --color-tertiary-contrast-500: var(--color-tertiary-contrast-light);
+  --color-tertiary-contrast-600: var(--color-tertiary-contrast-light);
+  --color-tertiary-contrast-700: var(--color-tertiary-contrast-light);
+  --color-tertiary-contrast-800: var(--color-tertiary-contrast-light);
+  --color-tertiary-contrast-900: var(--color-tertiary-contrast-light);
+  --color-tertiary-contrast-950: var(--color-tertiary-contrast-light);
+
+  /* Success (green) */
+  --color-success-50:  #EBF9F0;
+  --color-success-100: #C6EFDE;
+  --color-success-200: #8DE4BA;
+  --color-success-300: #54D997;
+  --color-success-400: #2FCF7C;
+  --color-success-500: #28A745;
+  --color-success-600: #248E3D;
+  --color-success-700: #1D7331;
+  --color-success-800: #165826;
+  --color-success-900: #0F3D18;
+  --color-success-950: #092A0F;
+  --color-success-contrast-dark:  var(--color-success-950);
+  --color-success-contrast-light: var(--color-success-50);
+  --color-success-contrast-50:  var(--color-success-contrast-dark);
+  --color-success-contrast-100: var(--color-success-contrast-dark);
+  --color-success-contrast-200: var(--color-success-contrast-dark);
+  --color-success-contrast-300: var(--color-success-contrast-dark);
+  --color-success-contrast-400: var(--color-success-contrast-dark);
+  --color-success-contrast-500: var(--color-success-contrast-dark);
+  --color-success-contrast-600: var(--color-success-contrast-light);
+  --color-success-contrast-700: var(--color-success-contrast-light);
+  --color-success-contrast-800: var(--color-success-contrast-light);
+  --color-success-contrast-900: var(--color-success-contrast-light);
+  --color-success-contrast-950: var(--color-success-contrast-light);
+
+  /* Warning (yellow) */
+  --color-warning-50:  #FFF9E5;
+  --color-warning-100: #FFF0B8;
+  --color-warning-200: #FFE681;
+  --color-warning-300: #FFDB4A;
+  --color-warning-400: #FFD21C;
+  --color-warning-500: #FFC107;
+  --color-warning-600: #DBA302;
+  --color-warning-700: #B88902;
+  --color-warning-800: #936E02;
+  --color-warning-900: #6A5101;
+  --color-warning-950: #4B3B01;
+  --color-warning-contrast-dark:  var(--color-warning-950);
+  --color-warning-contrast-light: var(--color-warning-50);
+  --color-warning-contrast-50:  var(--color-warning-contrast-dark);
+  --color-warning-contrast-100: var(--color-warning-contrast-dark);
+  --color-warning-contrast-200: var(--color-warning-contrast-dark);
+  --color-warning-contrast-300: var(--color-warning-contrast-dark);
+  --color-warning-contrast-400: var(--color-warning-contrast-dark);
+  --color-warning-contrast-500: var(--color-warning-contrast-dark);
+  --color-warning-contrast-600: var(--color-warning-contrast-light);
+  --color-warning-contrast-700: var(--color-warning-contrast-light);
+  --color-warning-contrast-800: var(--color-warning-contrast-light);
+  --color-warning-contrast-900: var(--color-warning-contrast-light);
+  --color-warning-contrast-950: var(--color-warning-contrast-light);
+
+  /* Error (red) */
+  --color-error-50:  #FDE8EB;
+  --color-error-100: #FAC3C9;
+  --color-error-200: #F68E98;
+  --color-error-300: #F05967;
+  --color-error-400: #ED3150;
+  --color-error-500: #DC3545;
+  --color-error-600: #C52F3A;
+  --color-error-700: #AC2831;
+  --color-error-800: #842025;
+  --color-error-900: #5B161A;
+  --color-error-950: #401015;
+  --color-error-contrast-dark:  var(--color-error-950);
+  --color-error-contrast-light: var(--color-error-50);
+  --color-error-contrast-50:  var(--color-error-contrast-dark);
+  --color-error-contrast-100: var(--color-error-contrast-dark);
+  --color-error-contrast-200: var(--color-error-contrast-dark);
+  --color-error-contrast-300: var(--color-error-contrast-dark);
+  --color-error-contrast-400: var(--color-error-contrast-dark);
+  --color-error-contrast-500: var(--color-error-contrast-light);
+  --color-error-contrast-600: var(--color-error-contrast-light);
+  --color-error-contrast-700: var(--color-error-contrast-light);
+  --color-error-contrast-800: var(--color-error-contrast-light);
+  --color-error-contrast-900: var(--color-error-contrast-light);
+  --color-error-contrast-950: var(--color-error-contrast-light);
+
+  /* Surface (neutrals #F9F9F9 → #080808) */
+  --color-surface-50:  #F9F9F9;
+  --color-surface-100: #EFEFEF;
+  --color-surface-200: #E5E5E5;
+  --color-surface-300: #D9D9D9;
+  --color-surface-400: #CCCCCC;
+  --color-surface-500: #B3B3B3;
+  --color-surface-600: #999999;
+  --color-surface-700: #7F7F7F;
+  --color-surface-800: #666666;
+  --color-surface-900: #4C4C4C;
+  --color-surface-950: #080808;
+  --color-surface-contrast-dark:  var(--color-surface-950);
+  --color-surface-contrast-light: var(--color-surface-50);
+  --color-surface-contrast-50:  var(--color-surface-contrast-dark);
+  --color-surface-contrast-100: var(--color-surface-contrast-dark);
+  --color-surface-contrast-200: var(--color-surface-contrast-dark);
+  --color-surface-contrast-300: var(--color-surface-contrast-dark);
+  --color-surface-contrast-400: var(--color-surface-contrast-light);
+  --color-surface-contrast-500: var(--color-surface-contrast-light);
+  --color-surface-contrast-600: var(--color-surface-contrast-light);
+  --color-surface-contrast-700: var(--color-surface-contrast-light);
+  --color-surface-contrast-800: var(--color-surface-contrast-light);
+  --color-surface-contrast-900: var(--color-surface-contrast-light);
+  --color-surface-contrast-950: var(--color-surface-contrast-light);
+}

@@ -6,7 +6,8 @@ import psycopg2
 import schedule
 import random
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Configure logging
 logging.basicConfig(
@@ -35,6 +36,53 @@ DEFAULT_QUERIES = [
         "add_jitter": True
     }
 ]
+
+def process_single_query(config):
+    """Process a single query (fetch, transform, load)"""
+    query = config.get('query')
+    if not query:
+        logger.warning(f"Skipping query config missing query string: {config}")
+        return 0
+
+    logger.info(f"Processing query: {query}")
+    data = fetch_prometheus_metrics(query)
+    records = transform_data(data, config)
+    if records:
+        load_to_timescaledb(records)
+        return len(records)
+    return 0
+
+def etl_job_parallel(max_workers=5, batch_size=None):
+    """Run the ETL process in parallel batches"""
+    logger.info("Starting parallel ETL job")
+
+    queries_config = load_queries_config()
+    total_records = 0
+
+    # Default batch size to process all queries if not specified
+    if batch_size is None:
+        batch_size = len(queries_config)
+
+    # Process queries in batches
+    for i in range(0, len(queries_config), batch_size):
+        batch = queries_config[i:i + batch_size]
+        logger.info(f"Processing batch {i//batch_size + 1} with {len(batch)} queries")
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all queries in this batch
+            future_to_query = {executor.submit(process_single_query, config): config for config in batch}
+
+            # Process results as they complete
+            for future in as_completed(future_to_query):
+                config = future_to_query[future]
+                try:
+                    records_processed = future.result()
+                    total_records += records_processed
+                except Exception as e:
+                    logger.error(f"Error processing query {config.get('query')}: {e}")
+
+    logger.info(f"Parallel ETL job completed - processed {total_records} records from {len(queries_config)} queries")
+    return total_records
 
 def load_queries_config():
     """Load queries configuration from file or use defaults"""
@@ -159,37 +207,16 @@ def load_to_timescaledb(records):
         if conn:
             conn.close()
 
-def etl_job():
-    """Run the full ETL process for all configured queries"""
-    logger.info("Starting ETL job")
-
-    queries_config = load_queries_config()
-    total_records = 0
-
-    for config in queries_config:
-        query = config.get('query')
-        if not query:
-            logger.warning(f"Skipping query config missing query string: {config}")
-            continue
-
-        logger.info(f"Processing query: {query}")
-        data = fetch_prometheus_metrics(query)
-        records = transform_data(data, config)
-        if records:
-            load_to_timescaledb(records)
-            total_records += len(records)
-
-    logger.info(f"ETL job completed - processed {total_records} records from {len(queries_config)} queries")
-
 def main():
     """Main entry point for the ETL service"""
     logger.info("Starting Prometheus to TimescaleDB ETL service")
 
-    # Run the job immediately once
-    etl_job()
+    etl_job_parallel(max_workers=5, batch_size=10)
 
     # Schedule the job to run at the specified interval
-    schedule.every(COLLECTION_INTERVAL).seconds.do(etl_job)
+    schedule.every(COLLECTION_INTERVAL).seconds.do(
+        lambda: etl_job_parallel(max_workers=5, batch_size=10)
+    )
 
     # Keep the script running
     while True:

@@ -1,7 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap');
 @import 'tailwindcss';
 
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
-@import '@skeletonlabs/skeleton/themes/cerberus';
+@import '@skeletonlabs/skeleton/themes/hamlindigo';
+@import '../manifest.css';
 
 @source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+
+.cds--chart-holder[data-carbon-theme=g90] {
+    .chart-grid-backdrop {
+        fill: transparent;
+    }
+}

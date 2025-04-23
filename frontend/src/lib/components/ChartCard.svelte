@@ -1,3 +1,4 @@
+<!-- AreaChart with theme context support -->
 <script lang="ts">
   import { theme } from '$lib/stores/theme';
   import { AreaChart } from '@carbon/charts-svelte';
@@ -6,10 +7,8 @@
 
   const { config, data } : { config: ChartConfig, data: ChartDataPoint[] } = $props();
 
-  console.log('THEME', $theme);
-
   let chartOptions = $derived({
-      ...getChartOptions(config),
+      ...getChartOptions(config, data[0]),
       theme: $theme === 'dark' ? 'g90' : 'g10'
   });
 </script>
