@@ -3,7 +3,6 @@
   import { readable } from 'svelte/store';
   import { invalidateAll } from '$app/navigation';
   import ChartCard from "$lib/components/ChartCard.svelte";
-  import type {ChartConfig, ChartDataPoint} from "$lib/types";
 
   let { title, data, configs } = $props<{
     title: string,

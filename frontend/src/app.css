@@ -3,10 +3,11 @@
 
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
-@import '@skeletonlabs/skeleton/themes/hamlindigo';
 @import '../manifest.css';
 
 @source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
 .cds--chart-holder[data-carbon-theme=g90] {
     .chart-grid-backdrop {

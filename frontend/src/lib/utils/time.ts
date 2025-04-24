@@ -1,6 +1,4 @@
-import type {TimeInterval} from "$lib/types";
-
-export const ALLOWED_INTERVALS: TimeInterval[] = ['15s', '1m', '1h', '1d', '1w', '1M', '1y'];
+export const ALLOWED_INTERVALS: TimeInterval[] = ['15 seconds', '1 minute', '1 hour', '1 day', '1 week', '1 month', '1 year'];
 
 export function isValidTimeInterval(interval: string | null): interval is TimeInterval {
   return !!interval && ALLOWED_INTERVALS.includes(interval as TimeInterval);

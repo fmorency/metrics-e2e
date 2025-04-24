@@ -1,5 +1,3 @@
-import type { ChartConfig } from '$lib/types';
-
 export const configs: ChartConfig[] = [
   {
     id: 'disk.space.total',

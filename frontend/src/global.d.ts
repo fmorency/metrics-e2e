@@ -1,14 +1,14 @@
 type ChartCategory = 'disk' | 'network' | 'minio' | 'kube' | 'gpu' | 'blockchain';
-export type TimeInterval = '15s' | '1m' | '1h' | '1d' | '1w' | '1M' | '1y';
+type TimeInterval = '15 seconds' | '1 minute' | '1 hour' | '1 day' | '1 week' | '1 month' | '1 year';
 
-export interface ChartConfig {
+interface ChartConfig {
   id: string;
   title: string;
   yAxisTitle: string;
   category?: ChartCategory;
 }
 
-export interface MetricRecord {
+interface MetricRecord {
   timestamp: string;
   chart: string;
   dimension: string;
@@ -17,9 +17,13 @@ export interface MetricRecord {
   instance: string;
 }
 
-export interface ChartDataPoint {
+interface ChartDataPoint {
   group: string;
   key: string;
   value: number;
   date: Date;
+}
+
+type Theme = {
+  value: 'system' | 'light' | 'dark'
 }

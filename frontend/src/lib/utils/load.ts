@@ -1,5 +1,4 @@
 import {error} from "@sveltejs/kit";
-import type {ChartConfig, ChartDataPoint, MetricRecord} from "$lib/types";
 import type { PageServerLoad } from "../../routes/$types";
 import {ALLOWED_INTERVALS, isValidDateString, isValidTimeInterval} from "$lib/utils/time";
 
@@ -10,7 +9,7 @@ import {ALLOWED_INTERVALS, isValidDateString, isValidTimeInterval} from "$lib/ut
  */
 function extractAndPrepareApiParams(url: URL): URLSearchParams {
   // Extract and validate interval
-  const intervalParam = url.searchParams.get("interval") || '1m'; // Default interval
+  const intervalParam = url.searchParams.get("interval") || '1 day'; // Default interval
   if (!isValidTimeInterval(intervalParam)) {
     throw error(400, `Invalid interval parameter. Allowed values are: ${ALLOWED_INTERVALS.join(', ')}`);
   }
@@ -58,7 +57,6 @@ export function createLoad(configs: ChartConfig[]) {
         let apiUrl = `/rpc/get_aggregated_metrics?${currentParams.toString()}`;
 
         try {
-
           const res = await fetch(apiUrl);
           if (!res.ok) {
             console.error(`Failed to fetch data for ${config.id}: ${res.status}`);
