@@ -14,8 +14,8 @@ ALTER TABLE netdata_metrics SET (
     timescaledb.compress,
     timescaledb.compress_segmentby = 'chart,family,dimension,instance'
 );
-SELECT add_retention_policy('netdata_metrics', INTERVAL '10 days');
-SELECT add_compression_policy('netdata_metrics', INTERVAL '1 day');
+SELECT add_retention_policy('netdata_metrics', INTERVAL '365 days');
+SELECT add_compression_policy('netdata_metrics', INTERVAL '1 month');
 
 -- Create index for faster queries
 CREATE INDEX IF NOT EXISTS idx_netdata_metrics_chart ON netdata_metrics (chart, timestamp DESC);

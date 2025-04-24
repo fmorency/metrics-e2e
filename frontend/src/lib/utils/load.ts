@@ -1,46 +1,53 @@
 import {error} from "@sveltejs/kit";
 import type { PageServerLoad } from "../../routes/$types";
-import {ALLOWED_INTERVALS, isValidDateString, isValidTimeInterval} from "$lib/utils/time";
+import {ALLOWED_INTERVALS, IntervalMap, isValidDateString, isValidTimeInterval} from "$lib/utils/time";
 
 /**
  * Extracts, validates, and prepares URL search parameters for the API call.
  * Throws SvelteKit errors for invalid parameters.
  * Returns a URLSearchParams object ready for the API request.
  */
-function extractAndPrepareApiParams(url: URL): URLSearchParams {
-  // Extract and validate interval
-  const intervalParam = url.searchParams.get("interval") || '1 day'; // Default interval
+function extractAndPrepareApiParams(url: URL): URLSearchParams | null {
+  const intervalParam = url.searchParams.get("interval");
+  if (!intervalParam) {
+    return null
+  }
   if (!isValidTimeInterval(intervalParam)) {
     throw error(400, `Invalid interval parameter. Allowed values are: ${ALLOWED_INTERVALS.join(', ')}`);
   }
-  const interval = intervalParam; // Assign validated interval
+  const interval = intervalParam;
+  const scale = IntervalMap[interval];
+  const now = new Date();
 
-  // Extract and validate time_from
-  const timeFrom = url.searchParams.get("time_from");
-  if (timeFrom && !isValidDateString(timeFrom)) {
-    throw error(400, `Invalid time_from parameter. Expected a valid date string.`);
-  }
-
-  // Extract and validate time_to
-  const timeTo = url.searchParams.get("time_to");
-  if (timeTo && !isValidDateString(timeTo)) {
-    throw error(400, `Invalid time_to parameter. Expected a valid date string.`);
+  switch (interval) {
+    case '1 minute':
+      now.setMinutes(now.getMinutes() - 1);
+      break;
+    case '1 hour':
+      now.setHours(now.getHours() - 1);
+      break;
+    case '1 day':
+      now.setDate(now.getDate() - 1);
+      break;
+    case '1 week':
+      now.setDate(now.getDate() - 7);
+      break;
+    case '1 month':
+      now.setMonth(now.getMonth() - 1);
+      break;
+    case '1 year':
+      now.setFullYear(now.getFullYear() - 1);
+      break;
   }
 
   // Prepare validated parameters for API call
   const apiParams = new URLSearchParams({
     order: 'timestamp.desc',
-    interval_str: interval, // Use validated interval
+    interval_str: scale,
   });
 
-  if (timeFrom) {
-    // Convert valid date string to ISO string for the API
-    apiParams.set('time_from', new Date(timeFrom).toISOString());
-  }
-  if (timeTo) {
-    // Convert valid date string to ISO string for the API
-    apiParams.set('time_to', new Date(timeTo).toISOString());
-  }
+  apiParams.set('time_from', now.toISOString());
+  apiParams.set('time_to', new Date().toISOString());
 
   return apiParams;
 }
@@ -48,6 +55,9 @@ function extractAndPrepareApiParams(url: URL): URLSearchParams {
 export function createLoad(configs: ChartConfig[]) {
   const loadFn: PageServerLoad = async ({ fetch, url }) => {
     const baseApiParams = extractAndPrepareApiParams(url);
+    if (!baseApiParams) {
+      return { configs, data: [] };
+    }
 
     const data = await Promise.all(
       configs.map(async (config) => {
