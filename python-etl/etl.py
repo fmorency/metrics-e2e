@@ -6,16 +6,16 @@ import psycopg2
 import schedule
 import random
 import json
+import math
 from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger('prometheus-etl')
 
-# Get configuration from environment variables
 PROMETHEUS_URL = os.environ.get('PROMETHEUS_URL', 'http://prometheus:9090')
 TIMESCALEDB_HOST = os.environ.get('TIMESCALEDB_HOST', 'timescaledb')
 TIMESCALEDB_PORT = os.environ.get('TIMESCALEDB_PORT', '5432')
@@ -25,7 +25,6 @@ TIMESCALEDB_PASSWORD = os.environ.get('TIMESCALEDB_PASSWORD', 'postgres')
 COLLECTION_INTERVAL = int(os.environ.get('COLLECTION_INTERVAL', '10'))
 QUERIES_CONFIG_PATH = os.environ.get('QUERIES_CONFIG_PATH', '/app/queries.json')
 
-# Default queries configuration
 DEFAULT_QUERIES = [
     {
         "query": "netdata_mem_available_MiB_average{}",
@@ -36,8 +35,126 @@ DEFAULT_QUERIES = [
     }
 ]
 
+def preload_historical_data(days=365, step='1m'):
+    logger.info(f"Preloading {days} days of historical data from Prometheus")
+    queries_config = load_queries_config()
+    end = int(time.time())
+    start = end - days * 86400
+
+    for config in queries_config:
+        query = config.get('query')
+        if not query:
+            continue
+        logger.info(f"Preloading for query: {query}")
+        # Prometheus limits: fetch in 7-day chunks to avoid timeouts
+        chunk_seconds = 7 * 86400
+        for chunk_start in range(start, end, chunk_seconds):
+            chunk_end = min(chunk_start + chunk_seconds, end)
+            params = {
+                'query': query,
+                'start': chunk_start,
+                'end': chunk_end,
+                'step': step
+            }
+            try:
+                response = requests.get(f"{PROMETHEUS_URL}/api/v1/query_range", params=params)
+                response.raise_for_status()
+                prometheus_json = response.json()
+                records = transform_range_data(prometheus_json, config)
+                if records:
+                    load_to_timescaledb(records)
+                    logger.info(f"Inserted {len(records)} records for {query} ({datetime.fromtimestamp(chunk_start)} to {datetime.fromtimestamp(chunk_end)})")
+            except Exception as e:
+                logger.error(f"Error preloading data for {query}: {e}")
+
+def transform_range_data(prometheus_json, config):
+    if not prometheus_json or prometheus_json.get('status') != 'success':
+        logger.error(f"Invalid response from Prometheus: {prometheus_json}")
+        return []
+
+    records = []
+    results = prometheus_json.get('data', {}).get('result', [])
+    chart = config.get('chart', 'unknown')
+    family = config.get('family', 'unknown')
+    dimension = config.get('dimension', 'unknown')
+    add_jitter = config.get('add_jitter', False)
+
+    for result in results:
+        metric = result.get('metric', {})
+        instance = metric.get('instance', 'unknown')
+        values = result.get('values', [])
+        for point in values:
+            if len(point) == 2:
+                timestamp_epoch, value = point
+                iso_timestamp = datetime.fromtimestamp(timestamp_epoch).isoformat()
+                try:
+                    float_value = float(value)
+                    if add_jitter:
+                        jitter = random.uniform(0.05, 0.15)
+                        float_value *= (1 + jitter)
+                    records.append({
+                        'timestamp': iso_timestamp,
+                        'chart': chart,
+                        'family': family,
+                        'dimension': dimension,
+                        'instance': instance,
+                        'value': float_value
+                    })
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Error converting value '{value}': {e}")
+    return records
+
+
+def fetch_and_transform_query(config):
+    query = config.get('query')
+    if not query:
+        logger.warning(f"Skipping query config missing query string: {config}")
+        return []
+
+    logger.info(f"Fetching data for query: {query}")
+    data = fetch_prometheus_metrics(query)
+    records = transform_data(data, config)
+    return records
+
+def etl_job_parallel(max_workers=5, batch_size=None):
+    logger.info("Starting parallel ETL job")
+
+    queries_config = load_queries_config()
+    all_records = []
+
+    if batch_size is None:
+        batch_size = len(queries_config)
+
+    # Process queries in batches
+    for i in range(0, len(queries_config), batch_size):
+        batch = queries_config[i:i + batch_size]
+        logger.info(f"Processing batch {i//batch_size + 1} with {len(batch)} queries")
+
+        batch_records = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_query = {executor.submit(fetch_and_transform_query, config): config for config in batch}
+
+            for future in as_completed(future_to_query):
+                config = future_to_query[future]
+                try:
+                    records = future.result()
+                    batch_records.extend(records)
+                    logger.info(f"Fetched {len(records)} records for query: {config.get('query')}")
+                except Exception as e:
+                    logger.error(f"Error processing query {config.get('query')}: {e}")
+
+        all_records.extend(batch_records)
+
+    if all_records:
+        logger.info(f"Loading all {len(all_records)} records in a single transaction")
+        load_to_timescaledb(all_records)
+    else:
+        logger.warning("No records to load to database")
+
+    logger.info(f"ETL job completed - processed {len(all_records)} records from {len(queries_config)} queries")
+    return len(all_records)
+
 def load_queries_config():
-    """Load queries configuration from file or use defaults"""
     try:
         if os.path.exists(QUERIES_CONFIG_PATH):
             with open(QUERIES_CONFIG_PATH, 'r') as f:
@@ -52,7 +169,6 @@ def load_queries_config():
         return DEFAULT_QUERIES
 
 def get_db_connection():
-    """Create a connection to TimescaleDB"""
     return psycopg2.connect(
         host=TIMESCALEDB_HOST,
         port=TIMESCALEDB_PORT,
@@ -62,7 +178,6 @@ def get_db_connection():
     )
 
 def fetch_prometheus_metrics(query):
-    """Fetch metrics for a specific Prometheus query"""
     try:
         query_params = {
             'query': query,
@@ -75,7 +190,6 @@ def fetch_prometheus_metrics(query):
         return None
 
 def transform_data(prometheus_json, config):
-    """Transform Prometheus data based on query configuration"""
     if not prometheus_json or prometheus_json.get('status') != 'success':
         logger.error(f"Invalid response from Prometheus: {prometheus_json}")
         return []
@@ -93,12 +207,10 @@ def transform_data(prometheus_json, config):
     add_jitter = config.get('add_jitter', False)
 
     for result in results:
-        # Get metric metadata
         metric = result.get('metric', {})
         instance = metric.get('instance', 'unknown')
         point = result.get('value', [])
 
-        # Process values (timestamp, value pairs)
         if len(point) == 2:
             timestamp_epoch, value = point
             iso_timestamp = datetime.fromtimestamp(timestamp_epoch).isoformat()
@@ -122,7 +234,6 @@ def transform_data(prometheus_json, config):
     return records
 
 def load_to_timescaledb(records):
-    """Insert transformed records into TimescaleDB"""
     if not records:
         logger.warning("No records to insert")
         return
@@ -132,25 +243,29 @@ def load_to_timescaledb(records):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        for record in records:
-            cursor.execute(
-                """
-                INSERT INTO netdata_metrics
-                (timestamp, chart, family, dimension, instance, value)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    record['timestamp'],
-                    record['chart'],
-                    record['family'],
-                    record['dimension'],
-                    record['instance'],
-                    record['value']
-                )
+        values = [
+            (
+                record['timestamp'],
+                record['chart'],
+                record['family'],
+                record['dimension'],
+                record['instance'],
+                record['value']
             )
+            for record in records
+        ]
+
+        cursor.executemany(
+            """
+            INSERT INTO netdata_metrics
+            (timestamp, chart, family, dimension, instance, value)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            values
+        )
 
         conn.commit()
-        logger.info(f"Successfully inserted {len(records)} records")
+        logger.info(f"Successfully inserted {len(records)} records in a single transaction")
     except Exception as e:
         logger.error(f"Error inserting data into TimescaleDB: {e}")
         if conn:
@@ -159,39 +274,16 @@ def load_to_timescaledb(records):
         if conn:
             conn.close()
 
-def etl_job():
-    """Run the full ETL process for all configured queries"""
-    logger.info("Starting ETL job")
-
-    queries_config = load_queries_config()
-    total_records = 0
-
-    for config in queries_config:
-        query = config.get('query')
-        if not query:
-            logger.warning(f"Skipping query config missing query string: {config}")
-            continue
-
-        logger.info(f"Processing query: {query}")
-        data = fetch_prometheus_metrics(query)
-        records = transform_data(data, config)
-        if records:
-            load_to_timescaledb(records)
-            total_records += len(records)
-
-    logger.info(f"ETL job completed - processed {total_records} records from {len(queries_config)} queries")
-
 def main():
-    """Main entry point for the ETL service"""
     logger.info("Starting Prometheus to TimescaleDB ETL service")
 
-    # Run the job immediately once
-    etl_job()
+    preload_historical_data(days=365, step='5m')
+    etl_job_parallel(max_workers=5, batch_size=10)
 
-    # Schedule the job to run at the specified interval
-    schedule.every(COLLECTION_INTERVAL).seconds.do(etl_job)
+    schedule.every(COLLECTION_INTERVAL).seconds.do(
+        lambda: etl_job_parallel(max_workers=5, batch_size=10)
+    )
 
-    # Keep the script running
     while True:
         schedule.run_pending()
         time.sleep(1)

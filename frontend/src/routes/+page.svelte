@@ -1,43 +1,34 @@
 <script lang="ts">
   import '@carbon/charts-svelte/styles.css';
-  import { readable } from 'svelte/store';
-  import { invalidateAll } from '$app/navigation';
-  import type {PageProps} from "../../.svelte-kit/types/src/routes/$types";
-  import ChartCard from "$lib/ChartCard.svelte";
+  import {ChoroplethChart, type ChoroplethChartOptions, Projection} from '@carbon/charts-svelte'
+  import {worldTopoJson} from './options';
+  import {data as mapData} from './data';
+  import {getColorFromCSS} from "$lib/utils/colors";
 
-  let { data }: PageProps = $props();
+  let themeColor = getColorFromCSS('--color-surface-900')
 
-  const configs = $derived(data.configs)
-  const initialDatasets = $derived(data.data)
-
-  const tick = readable(Date.now(), (set) => {
-    const id = setInterval(() => set(Date.now()), 10000);
-    return () => clearInterval(id);
-  });
-
-  $effect(() => {
-    if ($tick) {
-      invalidateAll();
+  const options: ChoroplethChartOptions = {
+    geoData: worldTopoJson,
+    height: "1000px",
+    thematic: {
+      projection: Projection.geoMercator
+    },
+    legend: {
+      enabled: false
+    },
+    toolbar: {
+      enabled: false
+    },
+    color: {
+      gradient: {
+        colors: [
+          themeColor
+        ]
+      }
     }
-  });
+  }
 </script>
 
-<main>
-  {#await Promise.resolve(initialDatasets) }
-    <p>Loading metrics data...</p>
-  {:then datasets}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {#each configs as config, i}
-        <div class="rounded-lg overflow-hidden p-4">
-          {#if datasets[i]?.length}
-            <ChartCard config={config} data={datasets[i]} />
-          {:else}
-            <p>No data available for {config.title}</p>
-          {/if}
-        </div>
-      {/each}
-    </div>
-  {:catch err}
-    <p>Error: {err.message}</p>
-  {/await}
+<main class="p-4">
+      <ChoroplethChart data={mapData} {options} />
 </main>

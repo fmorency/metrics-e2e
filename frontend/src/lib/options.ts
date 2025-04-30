@@ -1,9 +1,11 @@
-import type {ChartConfig} from "./types";
 import {ScaleTypes} from "@carbon/charts-svelte";
+import {getColorFromCSS} from "$lib/utils/colors";
 
-export function getChartOptions(config: ChartConfig) {
+export function getChartOptions(config: ChartConfig, latest?: ChartDataPoint) {
+  let themeColor = getColorFromCSS('--color-secondary-500')
+
   return {
-    title: config.title,
+    title:`${config.title}: ${latest?.value}`,
     axes: {
       bottom: {
         title: 'Timestamp',
@@ -22,6 +24,9 @@ export function getChartOptions(config: ChartConfig) {
     color: {
       gradient: {
         enabled: true
+      },
+      scale: {
+        [config.id]: themeColor
       }
     },
     points: {
@@ -37,6 +42,6 @@ export function getChartOptions(config: ChartConfig) {
       x: {
         enabled: false
       }
-    }
+    },
   };
 }

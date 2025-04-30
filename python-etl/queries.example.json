@@ -1,0 +1,44 @@
+[
+  {
+    "query": "sum(netdata_system_ram_MiB_average{})",
+    "chart": "system.ram",
+    "family": "ram",
+    "dimension": "avail",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_disk_space_GiB_average{dimension=\"used\"})",
+    "chart": "disk.space",
+    "family": "disk",
+    "dimension": "used",
+    "add_jitter": true
+  },
+  {
+    "query": "sum(sum_over_time(netdata_system_ip_kilobits_persec_average{dimension=~\"received\"}[10m]))",
+    "chart": "system.network.received",
+    "family": "network",
+    "dimension": "received",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(sum_over_time(netdata_system_ip_kilobits_persec_average{dimension=~\"sent\"}[10m]))*-1",
+    "chart": "system.network.sent",
+    "family": "network",
+    "dimension": "sent",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(sum_over_time(netdata_ip_tcppackets_packets_persec_average{dimension=\"sent\"}[10m]))*-1",
+    "chart": "system.tcp.sent",
+    "family": "tcp",
+    "dimension": "sent",
+    "add_jitter": false
+  },
+  {
+    "query": "count(netdata_system_cpu_percentage_average{dimension=\"idle\"})",
+    "chart": "cpu.count",
+    "family": "cpu",
+    "dimension": "count",
+    "add_jitter": false
+  }
+]

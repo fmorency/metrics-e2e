@@ -1,43 +1,197 @@
 [
   {
-    "query": "sum(netdata_system_ram_MiB_average{})",
-    "chart": "system.ram",
-    "family": "ram",
-    "dimension": "avail",
-    "add_jitter": false
-  },
-  {
-    "query": "sum(netdata_disk_space_GiB_average{dimension=\"used\"})",
+    "query": "sum(netdata_disk_space_GiB_average{dimension=\"used\",job!=\"netdata-dweb-hosting\", guest_containers!=\"true\", instance!=\"q-cell-00.alpha.manifest0.net:19999\", instance!=\"q-cell-01.alpha.manifest0.net:19999\",instance!=\"q-cell-02.alpha.manifest0.net:19999\", instance!=\"q-cell-03.alpha.manifest0.net:19999\"})",
     "chart": "disk.space",
     "family": "disk",
     "dimension": "used",
-    "add_jitter": true
-  },
-  {
-    "query": "sum(sum_over_time(netdata_system_ip_kilobits_persec_average{dimension=~\"received\"}[10m]))",
-    "chart": "system.network.received",
-    "family": "network",
-    "dimension": "received",
     "add_jitter": false
   },
   {
-    "query": "sum(sum_over_time(netdata_system_ip_kilobits_persec_average{dimension=~\"sent\"}[10m]))*-1",
+    "query": "sum(netdata_disk_space_GiB_average{dimension=\"used\",job!=\"netdata-dweb-hosting\", guest_containers!=\"true\", instance!=\"q-cell-00.alpha.manifest0.net:19999\", instance!=\"q-cell-01.alpha.manifest0.net:19999\",instance!=\"q-cell-02.alpha.manifest0.net:19999\", instance!=\"q-cell-03.alpha.manifest0.net:19999\"}) + sum(netdata_disk_space_GiB_average{dimension=\"avail\",job!=\"netdata-dweb-hosting\",guest_containers!=\"true\", instance!=\"q-cell-00.alpha.manifest0.net:19999\", instance!=\"q-cell-01.alpha.manifest0.net:19999\",instance!=\"q-cell-02.alpha.manifest0.net:19999\", instance!=\"q-cell-03.alpha.manifest0.net:19999\"})",
+    "chart": "disk.space.total",
+    "family": "disk",
+    "dimension": "total",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(sum_over_time(netdata_system_ip_kilobits_persec_average{dimension=~\"sent\",manifest_network=\"true\"}[10m]))*-1",
     "chart": "system.network.sent",
     "family": "network",
     "dimension": "sent",
     "add_jitter": false
   },
   {
-    "query": "sum(sum_over_time(netdata_ip_tcppackets_packets_persec_average{dimension=\"sent\"}[10m]))*-1",
+    "query": "sum(sum_over_time(netdata_system_ip_kilobits_persec_average{dimension=~\"received\",manifest_network=\"true\"}[10m]))",
+    "chart": "system.network.received",
+    "family": "network",
+    "dimension": "received",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(sum_over_time(netdata_ipv4_tcppackets_packets_persec_average{manifest_network=\"true\",dimension=\"sent\"}[10m]))*-1",
     "chart": "system.tcp.sent",
     "family": "tcp",
     "dimension": "sent",
     "add_jitter": false
   },
   {
-    "query": "count(netdata_system_cpu_percentage_average{dimension=\"idle\"})",
-    "chart": "cpu.count",
-    "family": "cpu",
+    "query": "sum(sum_over_time(netdata_ipv4_tcppackets_packets_persec_average{manifest_network=\"true\",dimension=\"received\"}[10m]))",
+    "chart": "system.tcp.received",
+    "family": "tcp",
+    "dimension": "received",
+    "add_jitter": false
+  },
+  {
+    "query": "count(netdata_cpu_cpu_percentage_average{dimension=\"idle\", manifest_network=\"true\", guest_containers!=\"true\", service!=\"netdata-dweb-hosting\", family=\"utilization\",instance!=\"q-cell-00.alpha.manifest0.net:19999\", instance!=\"q-cell-01.alpha.manifest0.net:19999\",instance!=\"q-cell-02.alpha.manifest0.net:19999\", instance!=\"q-cell-03.alpha.manifest0.net:19999\"})",
+    "chart": "system.cpu.cores",
+    "family": "system",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_system_ram_MiB_average{manifest_network=\"true\", job!=\"netdata-dweb-hosting\", guest_containers!=\"true\", metric_source=\"netdata\",instance!=\"q-cell-00.alpha.manifest0.net:19999\", instance!=\"q-cell-01.alpha.manifest0.net:19999\",instance!=\"q-cell-02.alpha.manifest0.net:19999\", instance!=\"q-cell-03.alpha.manifest0.net:19999\"})",
+    "chart": "system.memory",
+    "family": "system",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_prometheus_nginx_exporter_local_nginx_up_up_average{manifest_network=\"true\"})",
+    "chart": "web.servers",
+    "family": "web",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "topk(1, sum(minio_bucket_usage_object_total{job=\"minio-stats\"}) by (instance))",
+    "chart": "minio.total",
+    "family": "minio",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "count(count by (bucket) (minio_bucket_usage_total_bytes{job=\"minio-stats\"}))",
+    "chart": "minio.buckets",
+    "family": "minio",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "netdata_latitude_Latitude_average{manifest_network=\"true\"}",
+    "chart": "geo.latitude",
+    "family": "geo",
+    "dimension": "lat",
+    "add_jitter": false
+  },
+  {
+    "query": "netdata_longitude_Longitude_average{manifest_network=\"true\"}",
+    "chart": "geo.longitude",
+    "family": "geo",
+    "dimension": "lon",
+    "add_jitter": false
+  },
+  {
+    "query": "count(netdata_k8s_cgroup_cpu_limit_percentage_average{manifest_network=\"true\"})",
+    "chart": "kube.pods",
+    "family": "kube",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "count(up{manifest_network=\"true\", metric_source=\"netdata\", service=~\"netdata-kubernetes-prod-ops|netdata-kubernetes-prod-02\"})",
+    "chart": "kube.nodes",
+    "family": "kube",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "count(netdata_cpu_cpu_percentage_average{service=~\"netdata-kubernetes-prod-ops|netdata-kubernetes-prod-02\",dimension=\"idle\"})",
+    "chart": "kube.cpu",
+    "family": "kube",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_system_ram_MiB_average{service=~\"netdata-kubernetes-prod-ops|netdata-kubernetes-prod-02\"}) / 1048576",
+    "chart": "kube.memory",
+    "family": "kube",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "count(netdata_nvidia_smi_gpu_utilization_percent_average{manifest_network=\"true\", dimension=\"gpu\", family=\"gpu utilization\"}) + count(netdata_amdgpu_gpu_utilization_percentage_average{manifest_network=\"true\"})",
+    "chart": "gpu.total",
+    "family": "gpu",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_amdgpu_gpu_mem_vis_vram_usage_bytes_average{dimension=\"free\"})+sum(netdata_amdgpu_gpu_mem_vis_vram_usage_bytes_average{dimension=\"used\"})+sum(netdata_nvidia_smi_gpu_frame_buffer_memory_usage_B_average{dimension=\"free\"})+sum(netdata_nvidia_smi_gpu_frame_buffer_memory_usage_B_average{dimension=\"used\"})+sum(netdata_nvidia_smi_gpu_frame_buffer_memory_usage_B_average{dimension=\"reserved\"})",
+    "chart": "gpu.memory",
+    "family": "gpu",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "count(netdata_nvidia_smi_gpu_utilization_percent_average{manifest_network=\"true\", dimension=\"gpu\", family=\"gpu utilization\"})",
+    "chart": "gpu.nvidia.total",
+    "family": "gpu",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_nvidia_smi_gpu_frame_buffer_memory_usage_B_average{dimension=\"free\"})+sum(netdata_nvidia_smi_gpu_frame_buffer_memory_usage_B_average{dimension=\"used\"})+sum(netdata_nvidia_smi_gpu_frame_buffer_memory_usage_B_average{dimension=\"reserved\"})",
+    "chart": "gpu.nvidia.memory",
+    "family": "gpu",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "count(netdata_amdgpu_gpu_utilization_percentage_average{manifest_network=\"true\"})",
+    "chart": "gpu.amd.total",
+    "family": "gpu",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_amdgpu_gpu_mem_vis_vram_usage_bytes_average{dimension=\"free\"})+sum(netdata_amdgpu_gpu_mem_vis_vram_usage_bytes_average{dimension=\"used\"})",
+    "chart": "gpu.amd.memory",
+    "family": "gpu",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(netdata_cuda_cores_number_average{manifest_network=\"true\", dimension=\"cuda_cores\"})",
+    "chart": "gpu.nvidia.cuda.total",
+    "family": "gpu",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "max(netdata_tokens_number_average{many_chain=\"manifold-ledger-alpha\"})",
+    "chart": "blockchain.tokens",
+    "family": "blockchain",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "round(avg(tendermint_consensus_height{service=\"tendermint-prod-lifted-alpha\"}) + avg(cometbft_consensus_height{manifest_tier=\"mainnet\"}))",
+    "chart": "blockchain.blocks",
+    "family": "blockchain",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "max(max(netdata_prometheus_custom_exporter_local_manifest_ghostcloud_total_sites_sites_average{service=\"netdata-kvstore-qa-01\"}) or max(netdata_sites_number_average{chart=\"manifest_Manifest_Network.sites\",many_chain=\"manifest-web-alpha\"}))",
+    "chart": "web.sites",
+    "family": "web",
+    "dimension": "count",
+    "add_jitter": false
+  },
+  {
+    "query": "sum(sum_over_time(netdata_prometheus_nginx_exporter_local_nginx_http_requests_total_requests_persec_average{job=\"netdata-cdn-prod-web\"}[10m]))",
+    "chart": "web.requests",
+    "family": "web",
     "dimension": "count",
     "add_jitter": false
   }

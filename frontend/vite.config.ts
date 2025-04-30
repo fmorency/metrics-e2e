@@ -9,7 +9,7 @@ export default defineConfig({
 	},
 	server: {
     proxy: {
-      '/netdata_metrics': 'http://postgrest:3000'
+      '/rpc': 'http://localhost:3000'
     }
   }
 });
